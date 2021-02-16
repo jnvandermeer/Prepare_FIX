@@ -1,0 +1,74 @@
+Each dataset is de-mixed into ~ 160-200 components.
+
+fMRI Data < -- MIX --- DEMIX --> Components
+
+Each component has:
+1 brainy map
+1 time signal
+
+We Enrich this with, for each component:
+184 Features, these are number describing some aspects of the brainy map or the time signa.
+A designation: 'Good' or 'Bad'. This needs to be Judged.
+
+We can then throw the Bad Ones and Mix up back our fMRI data.
+
+Our computerized Judge = The Classifier 
+The classifier needs to be trained (by us)
+While we look at the Spatial Map and Temporal map of the IC components
+The Classifier looks purely at the Features. It needs to look at simplified version of the data, which are the Features.
+You cannot mix back fMRI data with the features - information is lost, only information pertaining to artifactual-ism is in there.
+
+
+
+# 1. grab out the features (all 219 subjects) - each IC component has 184 properties == features
+fix -f feat_001.feat
+fix -f feat_002.feat
+....
+fix -f feat_219.feat
+
+
+# 2. annotate ~ 20 people, each IC Component = Good or Bad, so we can use that for Training of the Classifier.
+# naming the files johan_v1.txt or caro_v1.txt or something else.
+# manual marking of Signal, Unknown (GOOD), or Motion/Resp/Cardiac/etc (BAD)
+fsleyes feat_001.feat/filtered_func_data.ica
+fsleyes feat_002.feat/filtered_func_data.ica 
+...
+fsleyes feat_020.feat/filtered_func_data.ica 
+
+
+
+# 3. train the Classifier
+# Rename/Copy the johan/caro.txt files into: hand_labels_noise.txt in the <fix_0XX.feat> folders (one level up)
+# Then train it:
+
+fix -t PISA_v3 -l <fix_001.feat> <fix_002.feat> ... <fix_020.feat> 
+
+# This will generate the PISA_v3.RData file.
+# This will also generate the PISA_v3_LOO_results file
+# show the file:
+
+
+#4. Once the classifier is trained you can use it to mark other components into 'good' or 'bad':
+fix -c feat_001.feat PISA_v3.RData 10
+fix -c feat_002.feat PISA_v3.RData 10
+...
+fix -c feat_219.feat PISA_v3.RData 10
+
+# this will make new .txt files (like ours) claiming whether compo netns are good or bad.
+# now we have the Classifiers verdict on each IC component if it's to be kept or to be binned.
+# this file is called: fix4melview_PISA_v3_thr10.txt
+
+
+
+# 5. We bin the bad components:
+fix -a feat_001.feat/fix4melview_PISA_v3_thr10.txt -m
+fix -a feat_002.feat/fix4melview_PISA_v3_thr10.txt -m
+...
+fix -a feat_219.feat/fix4melview_PISA_v3_thr10.txt -m
+# this will make the filtered_func_data_clean.nii.gz, in each feat_XXX.feat folder.
+# additionally it will also remove stuff that co-varies with the motion parameters.
+
+
+
+
+
