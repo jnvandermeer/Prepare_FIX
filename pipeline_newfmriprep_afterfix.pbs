@@ -1,0 +1,25 @@
+#########################################################################
+#
+# Script: pipeline.pbs
+# Author: Luca Cocchi + Johan van der Meer (changed for multiple runs)
+# Created: Sat 3 Oct 16:00:42 AEST 2020
+#
+##########################################################################
+#PBS -l mem=40gb,walltime=48:00:00,ncpus=32
+
+module load singularity
+
+
+
+FMRIPREP_IMAGE=/mnt/lustre/working/lab_michaebr/johanV/projects/hmm-pisa/fmriprep-20.1.1.simg
+SUB=480276
+
+BIDS_DIR=/mnt/lustre/working/lab_michaebr/johanV/projects/hmm-pisa/analysis/jobs/$SUB/job-01/Data/sub-01/bids_dir_fix/ 
+OUTP_DIR=/mnt/lustre/working/lab_michaebr/johanV/projects/hmm-pisa/analysis/jobs/$SUB/job-01/Data/sub-01/output_dir_fix/ 
+WORK_DIR=/mnt/lustre/working/lab_michaebr/johanV/projects/hmm-pisa/analysis/jobs/$SUB/job-01/Data/sub-01/output_dir_fix/work 
+
+singularity run --cleanenv $FMRIPREP_IMAGE $BIDS_DIR $OUTP_DIR participant -w $WORK_DIR --nthreads 32 --omp-nthreads 32 --mem_mb 40000 --fs-license-file /software/freesurfer/freesurfer-6.0.1/license.txt --output-spaces MNI152NLin6Asym:res-2 MNI152NLin2009cAsym func --ignore fieldmaps slicetiming
+
+#module unload singularity/2.6.0
+ 
+
